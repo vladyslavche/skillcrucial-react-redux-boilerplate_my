@@ -34,6 +34,11 @@ const middleware = [
 
 middleware.forEach((it) => server.use(it))
 
+server.post('/api/v1/input', (req, res) => {
+  const str = req.body.input.toUpperCase()
+  res.json({ result: str })
+})
+
 server.use('/api/', (req, res) => {
   res.status(404)
   res.end()
