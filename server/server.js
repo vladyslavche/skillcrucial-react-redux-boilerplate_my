@@ -1,5 +1,6 @@
 import express from 'express'
 import path from 'path'
+import axios from 'axios'
 import cors from 'cors'
 import sockjs from 'sockjs'
 import { renderToStaticNodeStream } from 'react-dom/server'
@@ -34,9 +35,30 @@ const middleware = [
 
 middleware.forEach((it) => server.use(it))
 
-server.post('/api/v1/input', (req, res) => {
+/*  server.post('/api/v1/input', (req, res) => {
   const str = req.body.input.toUpperCase()
   res.json({ result: str })
+})  */
+
+// server.get('/test', (req, res) => {
+//   console.log('TEST')
+//   res.send('Test')
+// })
+
+server.get('/api/v1/users/', async (req, res) => {
+  const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
+  res.json(users)
+})
+
+server.get('/api/v1/users/take/:number', async (req, res) => {
+  const { number } = req.params
+  const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
+  res.json(users.slice(0, +number))
+})
+
+server.get('/api/v1/users/:name', (req, res) => {
+  const { name } = req.params
+  res.json({ name })
 })
 
 server.use('/api/', (req, res) => {
