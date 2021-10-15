@@ -35,16 +35,6 @@ const middleware = [
 
 middleware.forEach((it) => server.use(it))
 
-/*  server.post('/api/v1/input', (req, res) => {
-  const str = req.body.input.toUpperCase()
-  res.json({ result: str })
-})  */
-
-// server.get('/test', (req, res) => {
-//   console.log('TEST')
-//   res.send('Test')
-// })
-
 server.get('/api/v1/users/', async (req, res) => {
   const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
   res.json(users)
