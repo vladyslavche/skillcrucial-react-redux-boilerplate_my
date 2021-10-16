@@ -9,6 +9,9 @@ import React from 'react'
 import cookieParser from 'cookie-parser'
 import config from './config'
 import Html from '../client/html'
+// import { readFile, writeFile } from 'fs'
+
+const { readFile, writeFile, unlink } = require('fs').promises
 
 require('colors')
 
@@ -25,15 +28,54 @@ let connections = []
 const port = process.env.PORT || 8090
 const server = express()
 
+const setHeaders = (req, res, next) => {
+  res.set('x-skillcrucial-user', '2b98cd11-d8f3-4dc4-b7cf-314704eb7926')
+  res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
+  next()
+}
+
 const middleware = [
   cors(),
   express.static(path.resolve(__dirname, '../dist/assets')),
   express.urlencoded({ limit: '50mb', extended: true, parameterLimit: 50000 }),
   express.json({ limit: '50mb', extended: true }),
-  cookieParser()
+  cookieParser(),
+  setHeaders
 ]
 
 middleware.forEach((it) => server.use(it))
+
+const userUrl = 'https://jsonplaceholder.typicode.com/users'
+const userPath = `${__dirname}/data/users.json`
+
+const getData = (url) => {
+  const usersList = axios(url)
+    .then(({ data }) => data)
+    .catch((err) => {
+      console.log(err)
+      return []
+    })
+  return usersList
+}
+
+server.get('/api/v1/users', async (req, res) => {
+  const userList = await readFile(userPath, 'utf-8')
+    .then((userData) => {
+      return JSON.parse(userData)
+    })
+    .catch(async (err) => {
+      console.log(err)
+      const receiveData = await getData(userUrl)
+      await writeFile(userPath, JSON.stringify(receiveData), 'utf-8')
+      return receiveData
+    })
+  res.json(userList)
+})
+
+server.delete('/api/v1/users', (req, res) => {
+  unlink(userPath)
+  res.json({ status: 'file was deleted' })
+})
 
 server.get('/api/v1/users/', async (req, res) => {
   const { data: users } = await axios('https://jsonplaceholder.typicode.com/users')
