@@ -58,6 +58,10 @@ const getData = (url) => {
   return usersList
 }
 
+const writeNewFile = (finalArray) => {
+  return writeFile(userPath, JSON.stringify(finalArray), 'utf-8')
+}
+
 server.get('/api/v1/users', async (req, res) => {
   const userList = await readFile(userPath, 'utf-8')
     .then((userData) => {
@@ -66,7 +70,7 @@ server.get('/api/v1/users', async (req, res) => {
     .catch(async (err) => {
       console.log(err)
       const receiveData = await getData(userUrl)
-      await writeFile(userPath, JSON.stringify(receiveData), 'utf-8')
+      await writeNewFile(receiveData)
       return receiveData
     })
   res.json(userList)
@@ -74,7 +78,47 @@ server.get('/api/v1/users', async (req, res) => {
 
 server.delete('/api/v1/users', (req, res) => {
   unlink(userPath)
-  res.json({ status: 'file was deleted' })
+    .then(() => {
+      res.json({ status: 'file was deleted' })
+    })
+    .catch((err) => {
+      console.log(err)
+      res.json({ status: 'No file' })
+    })
+})
+
+server.post('/api/v1/users', async (req, res) => {
+  const usersList = await readFile(userPath, 'utf-8')
+    .then(async (str) => {
+      const parsedString = JSON.parse(str)
+      const lastId = parsedString[parsedString.length - 1].id + 1
+      await writeNewFile([...parsedString, { ...req.body, id: lastId }])
+      return { status: 'success', id: lastId }
+    })
+    .catch(async (err) => {
+      console.log(err)
+      await writeNewFile([{ ...req.body, id: 1 }])
+      return { status: 'success', id: 1 }
+    })
+  res.json(usersList)
+})
+
+server.patch('/api/v1/users/:userId', async (req, res) => {
+  const { userId } = req.params
+  const updatedUser = { ...req.body, id: +userId }
+  const response = await readFile(userPath, 'utf-8')
+    .then(async (str) => {
+      const parsedString = JSON.parse(str)
+      const updatedList = parsedString.map((obj) => {
+        return obj.id === +userId ? { ...obj, ...updatedUser } : obj
+      })
+      await writeNewFile(updatedList)
+      return { status: 'success', id: +userId }
+    })
+    .catch(() => {
+      return { status: 'no file exists', id: +userId }
+    })
+  res.json(response)
 })
 
 server.get('/api/v1/users/', async (req, res) => {
