@@ -62,6 +62,8 @@ const writeNewFile = (finalArray) => {
   return writeFile(userPath, JSON.stringify(finalArray), 'utf-8')
 }
 
+// MiniTask 1
+
 server.get('/api/v1/users', async (req, res) => {
   const userList = await readFile(userPath, 'utf-8')
     .then((userData) => {
@@ -76,6 +78,8 @@ server.get('/api/v1/users', async (req, res) => {
   res.json(userList)
 })
 
+// MiniTask 2
+
 server.delete('/api/v1/users', (req, res) => {
   unlink(userPath)
     .then(() => {
@@ -86,6 +90,8 @@ server.delete('/api/v1/users', (req, res) => {
       res.json({ status: 'No file' })
     })
 })
+
+// MiniTask 3
 
 server.post('/api/v1/users', async (req, res) => {
   const usersList = await readFile(userPath, 'utf-8')
@@ -102,6 +108,26 @@ server.post('/api/v1/users', async (req, res) => {
     })
   res.json(usersList)
 })
+
+// MiniTask 4
+
+server.delete('/api/v1/users/:userId', async (req, res) => {
+  const response = await readFile(userPath, 'utf-8')
+    .then(async (str) => {
+      const parsedString = JSON.parse(str)
+      const filteredUsers = parsedString.filter((user) => {
+        return +req.params.userId !== user.id
+      })
+      await writeNewFile(filteredUsers)
+      return { status: 'success', id: +req.params.userId }
+    })
+    .catch(() => {
+      return { status: 'no file exists', id: +req.params.userId }
+    })
+  res.json(response)
+})
+
+// MiniTask 5
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
