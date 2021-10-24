@@ -6,6 +6,7 @@ import { Switch, Route, Redirect, StaticRouter } from 'react-router-dom'
 import store, { history } from '../redux'
 
 import Home from '../components/home'
+import Repo from '../components/repo'
 import DummyView from '../components/dummy-view'
 import NotFound from '../components/404'
 
@@ -48,12 +49,12 @@ const RootComponent = (props) => {
       <RouterSelector history={history} location={props.location} context={props.context}>
         <Startup>
           <Switch>
-            <Route exact path="/" component={DummyView} />
-            <Route exact path="/planets/:planetId" component={DummyView} />
+            <Route exact path="/" component={Home} />
+            <Route exact path="/:userName" component={Repo} />
+            <Route exact path="/:userName/:repositoryName" component={Home} />
             <Route exact path="/dashboard" component={Home} />
             <PrivateRoute exact path="/hidden-route" component={DummyView} />
             <OnlyAnonymousRoute exact path="/anonymous-route" component={DummyView} />
-
             <Route component={NotFound} />
           </Switch>
         </Startup>
