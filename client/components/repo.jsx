@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Head from './head'
+import Header from './header'
 
 const Repo = () => {
   const { userName } = useParams()
@@ -17,6 +18,7 @@ const Repo = () => {
   return (
     <div>
       <Head title="Repositories" />
+      <Header {...{ userName }} />
       {userName}
       {repos.map((repoObj) => {
         return (
