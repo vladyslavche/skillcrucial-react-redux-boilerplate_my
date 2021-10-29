@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import Head from './head'
+import Header from './header'
 
 const Readme = () => {
   const { userName, repositoryName } = useParams()
@@ -16,11 +17,13 @@ const Readme = () => {
       .catch((err) => console.log('Error: ', err))
   }, [url])
   return (
-    <div>
+    <>
       <Head title="Readme" />
-      {`${userName} - ${repositoryName}`}
-      <ReactMarkdown>{text}</ReactMarkdown>
-    </div>
+      <Header {...{ userName, repositoryName }} />
+      <div id="description" className="m-2">
+        <ReactMarkdown>{text}</ReactMarkdown>
+      </div>
+    </>
   )
 }
 
